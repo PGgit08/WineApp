@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_session import Session
 
 import os
 
@@ -18,7 +18,12 @@ app = Flask(__name__)
 # set config for app 
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
+
+app.secret_key = 'a8usjd091js;*@Oma0'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-login = LoginManager(app)
+Session(app)
+
+from app import models, routes
