@@ -1,68 +1,58 @@
 # server routes for this program
 from app import db
 from app.models import User, Post
-from flask import request, session, jsonify
+from flask import request, jsonify, make_response, redirect
+from flask_login import current_user, login_user, login_required, logout_user
 from app import app
 
+@app.route('/login', methods=['GET'])
+def login():
+    # get params
+    username = request.args.get('username')
+    password = request.args.get('password')
 
-@app.route('/')
-def home():
-    return 'API FOR WINEAPP, DOWLOAD AT PLAYSTORE, API COPYRIGHT PETER GUTKOVICH'
+    # print(current_user)
 
-@app.route('/api/create_session', methods=['POST'])
-def create_session():
-    session['username'] = request.form['username']
-    session['password'] = request.form['password']
-    session['email'] = request.form['email']
+    if current_user.is_authenticated:
+        return 'user_auth'
 
-    find_user = User.query.filter_by(username=session['username']).first()
-    
-    # find the user and get their id and put it into session file
-    if find_user:
-        session['user_id'] = find_user.id
-        return 'session_created'
-
-    if find_user is None:
+    user = User.query.filter_by(username=username).first()
+    if user is None or not user.check_password_hash(password):
         return 'session_fail'
 
-@app.route('/api/register', methods=['POST'])
-def register():
-    # get info from POST request
-    username = request.form['username']
-    password = request.form['password']
-    email = request.form['email']
+    # this is not needed but i stil added it(if statement)
+    if user and user.check_password_hash(password):
+        login_user(user, remember=False)
 
-    # check if this user already exists(i know it is checked in the flow but JUST DO IT)
+    return 'session_created'
+
+@app.route('/register')
+def register():
+    username = request.args.get('username')
+    password = request.args.get('password')
+    email = request.args.get('email')
+
     check_user = User.query.filter_by(username=username).first()
-    if check_user:
-        # tell app that user exists
-        return 'user_exist'
-    
-    if check_user is None:
-        # create the user
+
+    # check if this user exists
+    if not check_user: 
         new_user = User(username=username, email=email)
         new_user.hash_password(password)
-        
-        # add user
+
+        # add this to the database
         db.session.add(new_user)
         db.session.commit()
-        
-        # tell app that it was a success
-        return 'user_made'
+        return 'create_made'
 
+    # if not send bad shit
+    else:
+        return 'create_fail'
 
-@app.route('/api/get_user')
-def get_user():
-    username = session.get('username')
-    password = session.get('password')
-    email = session.get('email')
-    user_id = session.get('user_id')
+@app.route('/logout')
+def logout():
+    logout_user()
+    return 'logout_success'
 
-    posted = Post.query.filter_by(user_id=user_id).all()
-    user = User.query.filter_by(username=username).first()
-
-    # packed_user = [user.email, user.password, user.username]
-    # packed_data = [posted, packed_user]
-
-    print(username)
-    return 'y'
+@app.route('/')
+def dicks():
+    return 'dicks'
