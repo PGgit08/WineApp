@@ -1,7 +1,10 @@
+'Routes for changing user table(adding users, and changing data)' 
+'As well as routes for creating session cookies, and deleting them'
+
 # server routes for this program
 from app import db
 from app.models import User, Post
-from flask import request, jsonify, make_response, redirect
+from flask import request, jsonify, make_response
 from flask_login import current_user, login_user, login_required, logout_user
 from app import app
 
@@ -11,7 +14,7 @@ def login():
     username = request.args.get('username')
     password = request.args.get('password')
 
-    # print(current_user)
+    # current_user = user loaded from user_id in session cookie
 
     if current_user.is_authenticated:
         return 'user_auth'
@@ -22,7 +25,10 @@ def login():
 
     # this is not needed but i stil added it(if statement)
     if user and user.check_password_hash(password):
-        login_user(user, remember=False)
+        # send cookie to client with user_id
+        # remember is true, because we do not want
+        # react-native app to lose cookie
+        login_user(user, remember=True)
 
     return 'session_created'
 
@@ -44,15 +50,13 @@ def register():
         db.session.commit()
         return 'create_made'
 
-    # if not send bad shit
+    # if not send bad stuff
     else:
         return 'create_fail'
 
 @app.route('/logout')
 def logout():
+    # delete cookies on client with user_id
     logout_user()
     return 'logout_success'
 
-@app.route('/')
-def dicks():
-    return 'dicks'
