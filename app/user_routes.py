@@ -17,11 +17,11 @@ def login():
     # current_user = user loaded from user_id in session cookie
 
     if current_user.is_authenticated:
-        return 'user_auth'
+        return 'Logged In Already'
 
     user = User.query.filter_by(username=username).first()
     if user is None or not user.check_password_hash(password):
-        return 'session_fail'
+        return 'Can\'t Log In, Make Sure Your Username and Password Is Correct'
 
     # this is not needed but i stil added it(if statement)
     if user and user.check_password_hash(password):
@@ -29,8 +29,7 @@ def login():
         # remember is true, because we do not want
         # react-native app to lose cookie
         login_user(user, remember=True)
-
-    return 'session_created'
+        'Log In Successful'
 
 @app.route('/register')
 def register():
@@ -48,16 +47,16 @@ def register():
         # add this to the database
         db.session.add(new_user)
         db.session.commit()
-        return 'create_made'
+        return 'Register Successful'
 
     # if not send bad stuff
     else:
-        return 'create_fail'
+        return 'Please Try Again'
 
 @app.route('/logout')
 @login_required
 def logout():
     # delete cookies on client with user_id
     logout_user()
-    return 'logout_success'
+    return 'Logged Out'
 
