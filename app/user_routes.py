@@ -55,6 +55,7 @@ def register():
         return 'create_fail'
 
 @app.route('/logout')
+@login_required
 def logout():
     # delete cookies on client with user_id
     logout_user()

@@ -18,7 +18,10 @@ app = Flask(__name__)
 # set config for app 
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# secret key for cookies which decodes cookies
 app.secret_key = '01jokjd01pj;kdj;aouskd'
+
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
