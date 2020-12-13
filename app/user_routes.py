@@ -5,8 +5,8 @@
 from app import db
 from app.models import User, Post
 from flask import request, jsonify, make_response
-from flask_login import current_user, login_user, login_required, logout_user
 from app import app
+from jwt import identity
 
 @app.route('/login', methods=['GET'])
 def login():
@@ -54,7 +54,6 @@ def register():
         return 'Please Try Again'
 
 @app.route('/logout')
-@login_required
 def logout():
     # delete cookies on client with user_id
     logout_user()

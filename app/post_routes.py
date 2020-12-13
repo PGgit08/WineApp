@@ -1,13 +1,11 @@
 from app import db
 from app.models import Post, datetime
 from flask import request, jsonify, make_response
-from flask_login import current_user, login_user, login_required, logout_user
 from app import app, json
 
 # this returns both the user, and the post
 # login_required checks if the cookie exists or not
 @app.route('/get', methods=["GET"])
-@login_required
 def get_all():
     user_id = current_user.id 
 
@@ -38,7 +36,6 @@ def get_all():
     return jsonify(json_response)
 
 @app.route('/add', methods=["GET"])
-@login_required
 def add_post():
     # code for adding a post
     # retrieve the cookie once again
@@ -57,7 +54,6 @@ def add_post():
     return 'Added Post'
 
 @app.route('/change', methods=["GET"])
-@login_required
 def change_post():
     # request params
     new_body = request.args.get('new_body')
@@ -79,7 +75,6 @@ def change_post():
 
 
 @app.route('/delete', methods=["GET"])
-@login_required
 def delete_post():
     # code for deleting a post
     delete_id = int(request.args.get('id'))

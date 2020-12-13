@@ -1,18 +1,13 @@
-from app import db, login
+from app import db
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_login import UserMixin
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
 
 # structure of database, model
 # changes that are not related to model, like creating a table, 
 # are made in cmd, using flask migrate, or alembic
 
 # also, UserMixin gives the user function like is_authenticated, and is_active
-class User(db.Model, UserMixin):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)

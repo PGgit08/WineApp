@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
-import json
 
+import json
 import os
 
 # base dir for creation uri for database
@@ -23,9 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # secret key for cookies which decodes cookies
 app.secret_key = '01jokjd01pj;kdj;aouskd'
 
-
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-login = LoginManager(app)
 
 from app import models, user_routes, post_routes
