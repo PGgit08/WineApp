@@ -1,20 +1,19 @@
-from app import db
+from app import db, app, json
 from app.models import Post, datetime
 from flask import request, jsonify, make_response
-from app import app, json
+from app.jwt as *
 
 # this returns both the user, and the post
 # login_required checks if the cookie exists or not
 @app.route('/get', methods=["GET"])
 def get_all():
-    user_id = current_user.id 
+    user_id = current_user().id 
 
     # this user's posts
     user_posts = Post.query.filter_by(user_id=user_id).all()
 
-    # 2 responses
+    # response
     posts_response = {}
-    user_response = {}
 
     for post in user_posts:
         posts_response[post.id] = [
@@ -22,24 +21,18 @@ def get_all():
             datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
         ]
     
-    # Password can't be unhashed, so just the username and the email are sent
-    user_response['username'] = current_user.username
-    user_response['email'] = current_user.email
-
-    # create json item for react-native
-    json_response = [user_response, posts_response]
 
     # so basically the client already has the user_id
     # react-native will store the username and password in App
     # class's this.state, and also user.json
     # therefore this endpoint just needs to return some json
-    return jsonify(json_response)
+    return jsonify(posts_response)
 
 @app.route('/add', methods=["GET"])
 def add_post():
     # code for adding a post
     # retrieve the cookie once again
-    user_id = current_user.id
+    user_id = current_user().id
 
     # get request params
     post_body = request.args.get("body")
@@ -64,7 +57,7 @@ def change_post():
     
     # check if this post belongs to the current user
     # also check if the post even exists
-    if changed_posted and changed_posted.user_id == current_user.id:
+    if changed_posted and changed_posted.user_id == current_user().id:
         # only one post has this unique id, so no .first() is needed
         Post.query.filter_by(id=post_id).update(dict(body=new_body))
         db.session.commit()
@@ -81,7 +74,7 @@ def delete_post():
     
     delete_post = Post.query.filter_by(id=delete_id).first()
 
-    if delete_post and delete_post.user_id == current_user.id:
+    if delete_post and delete_post.user_id == current_user().id:
         db.session.delete(delete_post)
         db.session.commit()
         return 'Post Deleted'

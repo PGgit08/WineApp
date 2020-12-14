@@ -1,17 +1,38 @@
-from flask_jwt import JWT
-from app import app
+from flask import request
 from app.models import User
+import jwt
+from app import app
 
-# functions for jwt
-def authenticate(username, password):
-    user = User.query.filter_by(username=username).first()
-    if user and user.check_password_hash(password, user.password):
-        return user
+# create jwt using current users id
+# this will be used in log in
+def create_jwt(user_id):
+    try:
+        payload = {
+            'sub': user_id
+        }
+        return jwt.encode(
+            payload,
+            app.secret_key,
+            algorithm='HS256'
+        )
 
+    except Exception as e:
+        return e
 
-def identity(payload):
-    user_id = payload['identity']
-    return User.query.get(user_id)
+# static method decorator means that this isn't realated to the class
+# at all, and it is just doing it's own thing
+def current_user():
+    auth_header = request.headers.get('Authorization')
 
-# create jwt
-jwt = JWT(app, authenticate, identity)
+    # check if the header even exists
+    if auth_header:
+        auth_token = auth_header.split(" ")[1]
+        try:
+            payload = jwt.decode(auth_token, app.secret_key)
+            return User.query.get(payload['sub'])
+        
+        except jwt.InvalidTokenError:
+            return False
+    
+    else:
+        return False

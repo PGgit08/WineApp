@@ -1,4 +1,4 @@
-from app import db
+from app import db, app
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -6,7 +6,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # changes that are not related to model, like creating a table, 
 # are made in cmd, using flask migrate, or alembic
 
-# also, UserMixin gives the user function like is_authenticated, and is_active
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
