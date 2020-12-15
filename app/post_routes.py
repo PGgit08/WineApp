@@ -1,7 +1,7 @@
 from app import db, app, json
 from app.models import Post, datetime
 from flask import request, jsonify, make_response
-from app.jwt as *
+from app.jwt import *
 
 # this returns both the user, and the post
 # login_required checks if the cookie exists or not
