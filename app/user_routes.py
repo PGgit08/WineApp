@@ -30,6 +30,9 @@ def register():
     password = request.args.get('password')
     email = request.args.get('email')
 
+    if username is None:
+        return 'Please Enter Register Credentials'
+
     check_user = User.query.filter_by(username=username).first()
 
     # check if this user exists
