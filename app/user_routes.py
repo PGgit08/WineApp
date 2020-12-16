@@ -5,24 +5,36 @@
 from app import db, app
 from app.models import User, Post
 from flask import request, jsonify, make_response
-from app.jwt import *
+from app.jwt_manager import * 
+
+@app.route('/')
+def home():
+    return 'Api for wineapp, route not found'
 
 @app.route('/login')
-def test():
+def login():
     username = request.args.get('username')
     password = request.args.get('password')
-
-    if current_user():
-        return 'Logged In Already'
 
     user = User.query.filter_by(username=username).first()
 
     # this means that the user exists
     if user and user.check_password_hash(password):
-        return create_jwt(user.id)
+        api_response = {
+            'jwt': create_jwt(user.id),
+            'username': user.username,
+            'email': user.email,
+            'error': 0,
+            'mes': 'Login Successful'
+            }
+        return jsonify(api_response)
     
     else:
-        return 'Error Logging In, Please Check Credentials'
+        api_response = {
+            'error': 1,
+            'mes': 'Login failed, please try again'
+        }
+        return jsonify(api_response)
 
 @app.route('/register')
 def register():
@@ -30,8 +42,12 @@ def register():
     password = request.args.get('password')
     email = request.args.get('email')
 
-    if username is None:
-        return 'Please Enter Register Credentials'
+    if username is None or password is None or email is None:
+        api_response = {
+            'error': 1,
+            'mes': 'Enter Register Credentials'
+        }
+        return jsonify(api_response)
 
     check_user = User.query.filter_by(username=username).first()
 
@@ -43,8 +59,17 @@ def register():
         # add this to the database
         db.session.add(new_user)
         db.session.commit()
-        return 'Register Successful'
+        
+        api_response = {
+            'error': 0,
+            'mes': 'Register Successful'
+        }
+        return jsonify(api_response)
 
     # if not send bad stuff
     else:
-        return 'Please Try Again'
+        api_response = {
+            'error': 1,
+            'mes': 'This user exists, try again'
+        }
+        return jsonify(api_response)

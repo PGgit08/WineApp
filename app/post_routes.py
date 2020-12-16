@@ -1,12 +1,14 @@
-from app import db, app, json
+from app import db, app
 from app.models import Post, datetime
 from flask import request, jsonify, make_response
-from app.jwt import *
+from app.jwt_manager import *
 
-# this returns both the user, and the post
-# login_required checks if the cookie exists or not
+# jwt_requrired is a func for 
+# checking if the jwt is in the header
 @app.route('/get', methods=["GET"])
+@jwt_required
 def get_all():
+    # get current user
     user_id = current_user().id 
 
     # this user's posts
@@ -29,6 +31,7 @@ def get_all():
     return jsonify(posts_response)
 
 @app.route('/add', methods=["GET"])
+@jwt_required
 def add_post():
     # code for adding a post
     # retrieve the cookie once again
@@ -44,9 +47,15 @@ def add_post():
     db.session.add(new_post)
     db.session.commit()
 
-    return 'Added Post'
+    api_json = {
+        "error": 0,
+        "mes": 'Post Added' 
+    }
+
+    return jsonify(api_json)
 
 @app.route('/change', methods=["GET"])
+@jwt_required
 def change_post():
     # request params
     new_body = request.args.get('new_body')
@@ -61,13 +70,22 @@ def change_post():
         # only one post has this unique id, so no .first() is needed
         Post.query.filter_by(id=post_id).update(dict(body=new_body))
         db.session.commit()
-        return 'Changed Post'
-    
+
+        api_json = {
+            'error': 0,
+            'mes': 'Post Changed'
+        }    
+        return jsonify(api_json)
+
     else:
-        return 'Post Change Failed'
+        api_json = {
+            'error': 1,
+            'mes': 'Post change failed, this post does not belong to you'
+        }
 
 
 @app.route('/delete', methods=["GET"])
+@jwt_required
 def delete_post():
     # code for deleting a post
     delete_id = int(request.args.get('id'))
@@ -77,7 +95,16 @@ def delete_post():
     if delete_post and delete_post.user_id == current_user().id:
         db.session.delete(delete_post)
         db.session.commit()
-        return 'Post Deleted'
+        
+        api_json = {
+            'error': 0,
+            'mes': 'Post Deleted'
+        }    
+        return jsonify(api_json)
 
     else:
-        return 'Post Delete Failed'
+        api_json = {
+            'error': 1,
+            'mes': 'Post delete failed, this post does not belong to you'
+        }    
+        return jsonify(api_json)
