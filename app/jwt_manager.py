@@ -25,25 +25,30 @@ def current_user():
     auth_header = request.headers.get('Authorization')
 
     auth_token = auth_header.split(" ")[1]
-    try:
-        payload = jwt.decode(auth_token, app.secret_key)
-        return User.query.get(payload['sub'])
-    
-    except jwt.InvalidTokenError:
-        return False
+    payload = jwt.decode(auth_token, app.secret_key)
+    return User.query.get(payload['sub'])
 
 # create decorator for function
+# also check if the token is valid
 def jwt_required(func):
     def wrapper():
         error_json = {
             'error': 1,
-            'mes': 'Please send token for this endpoint'
+            'mes': 'Please send token(be sure it\'s valid) for this endpoint'
         }
         auth_header = request.headers.get('Authorization')
         if not auth_header:
             return jsonify(error_json)
         
         if auth_header:
+            # now check if the token is valid
+            try:
+                jwt.decode(auth_header.split(" ")[1], app.secret_key)
+            
+            except jwt.InvalidTokenError:
+                return jsonify(error_json)
+            
+            # if token is valid the func will be ran
             func()
 
     # if we dont do this, then there will be multiple 

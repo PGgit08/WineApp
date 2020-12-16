@@ -23,6 +23,8 @@ def get_all():
             datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
         ]
     
+    posts_response['error'] = 0
+    posts_response['msg'] = 'Info Gotten Successfully'
 
     # so basically the client already has the user_id
     # react-native will store the username and password in App
