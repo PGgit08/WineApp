@@ -17,7 +17,7 @@ def create_jwt(user_id):
         )
 
     except Exception as e:
-        return e
+        return None
 
 # static method decorator means that this isn't realated to the class(bruh)
 # at all, and it is just doing it's own thing
@@ -26,7 +26,13 @@ def current_user():
 
     auth_token = auth_header.split(" ")[1]
     payload = jwt.decode(auth_token, app.secret_key)
-    return User.query.get(payload['sub'])
+    # check if work
+    user = User.query.get(payload['sub'])
+    if user:
+        return user
+    
+    else:
+        return None
 
 # create decorator for function
 # also check if the token is valid
@@ -43,7 +49,10 @@ def jwt_required(func):
         if auth_header:
             # now check if the token is valid
             try:
-                jwt.decode(auth_header.split(" ")[1], app.secret_key)
+                user_id = jwt.decode(auth_header.split(" ")[1], app.secret_key)
+                # now check if this token id exists in the db
+                if User.query.get(user_id) is None:
+                    return jsonify(error_json)
             
             except jwt.InvalidTokenError:
                 return jsonify(error_json)

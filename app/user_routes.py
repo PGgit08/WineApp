@@ -20,15 +20,17 @@ def login():
 
     # this means that the user exists
     if user and user.check_password_hash(password):
-        api_response = {
-            'jwt': create_jwt(user.id),
-            'username': user.username,
-            'email': user.email,
-            'error': 0,
-            'mes': 'Login Successful'
-            }
-        return jsonify(api_response)
-    
+        # return jwt
+        jwt = create_jwt(user.id)
+        if jwt:
+            return jwt
+        
+        if jwt is None:
+            return jsonify({
+                'error': 1,
+                'mes': 'We are having issues with the server, please try again later'
+            })
+
     else:
         api_response = {
             'error': 1,
@@ -73,3 +75,17 @@ def register():
             'mes': 'This user exists, try again'
         }
         return jsonify(api_response)
+
+# this is done in app's init page
+@app.route('/identify')
+@jwt_required
+def identity():
+    username = current_user().username 
+    email = current_user().email
+
+    api_response = {
+        'username': username,
+        'email': email
+    }
+
+    return jsonify(api_response)
