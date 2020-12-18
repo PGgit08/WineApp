@@ -90,4 +90,4 @@ def identity():
     if user.email:
         api_response['email'] = user.email
 
-    return 'hello'
+    return jsonify(api_response)
