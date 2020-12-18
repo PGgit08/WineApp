@@ -80,12 +80,14 @@ def register():
 @app.route('/identify')
 @jwt_required
 def identity():
-    username = current_user().username 
-    email = current_user().email
+    user = current_user()
 
     api_response = {
-        'username': username,
-        'email': email
+        'username': user.username,
+        'email': ''
     }
 
-    return jsonify(api_response)
+    if user.email:
+        api_response['email'] = user.email
+
+    return 'hello'

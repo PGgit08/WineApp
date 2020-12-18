@@ -49,7 +49,7 @@ def jwt_required(func):
         if auth_header:
             # now check if the token is valid
             try:
-                user_id = jwt.decode(auth_header.split(" ")[1], app.secret_key)
+                user_id = jwt.decode(auth_header.split(" ")[1], app.secret_key)['sub']
                 # now check if this token id exists in the db
                 if User.query.get(user_id) is None:
                     return jsonify(error_json)
@@ -58,7 +58,8 @@ def jwt_required(func):
                 return jsonify(error_json)
             
             # if token is valid the func will be ran
-            func()
+            # the function gets RETURNED
+            return func()
 
     # if we dont do this, then there will be multiple 
     # wrapper() funcs, so each wrapper func 
