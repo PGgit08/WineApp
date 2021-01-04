@@ -3,6 +3,8 @@ from app.models import Post, datetime
 from flask import request, jsonify, make_response
 from app.jwt_manager import *
 
+from json import dumps
+
 # jwt_requrired is a func for 
 # checking if the jwt is in the header
 @app.route('/get', methods=["GET"])
@@ -18,15 +20,18 @@ def get_all():
     posts_response = {}
 
     for post in user_posts:
-        posts_response[post.id] = [
-            post.body,
-            datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
-        ]
+        posts_response[post.id] = {
+            "body": post.body,
+            "time": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
+        }
     
     posts_response['error'] = 0
     posts_response['msg'] = 'Info Gotten Successfully'
 
-    return jsonify(posts_response)
+    print(posts_response)
+
+    json = dumps(posts_response)
+    return json
 
 @app.route('/add', methods=["GET"])
 @jwt_required
