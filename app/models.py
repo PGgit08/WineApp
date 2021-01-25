@@ -23,3 +23,16 @@ class Post(db.Model):
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer)
+
+    # store that this post belongs to
+    my_store = db.Column(db.Integer)
+
+class WineStore(db.Model):
+    owner = db.Column(db.Integer) # user id of the owner of this store
+
+    id = db.Column(db.Integer, primary_key=True) # primary key
+    name = db.Column(db.String)
+    address = db.Column(db.String) # example: 111 jordan street
+    location = db.Column(db.String) # example: lat 10, long 20
+
+

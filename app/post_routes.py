@@ -1,13 +1,14 @@
 from app import db, app
 from app.models import Post, datetime
-from flask import request, jsonify, make_response
+from flask import request, jsonify
 from app.jwt_manager import *
 
 from json import dumps
 
+
 # jwt_requrired is a func for 
 # checking if the jwt is in the header
-@app.route('/get', methods=["GET"])
+@app.route('/posts/get', methods=["GET"])
 @jwt_required
 def get_all():
     # get current user
@@ -33,7 +34,7 @@ def get_all():
     json = dumps(posts_response)
     return json
 
-@app.route('/add', methods=["GET"])
+@app.route('/posts/add', methods=["GET"])
 @jwt_required
 def add_post():
     # code for adding a post
@@ -42,9 +43,10 @@ def add_post():
 
     # get request params
     post_body = request.args.get("body")
+    place_id = request.args.get("place_id")
 
     # create row based on model
-    new_post = Post(user_id=user_id, body=post_body)
+    new_post = Post(user_id=user_id, body=post_body, my_store=place_id)
 
     # add post
     db.session.add(new_post)
@@ -57,12 +59,12 @@ def add_post():
 
     return jsonify(api_json)
 
-@app.route('/change', methods=["GET"])
+@app.route('/posts/change/<post_id>', methods=["GET"])
 @jwt_required
-def change_post():
+def change_post(post_id):
     # request params
     new_body = request.args.get('new_body')
-    post_id = request.args.get('post_id')
+    post_id = int(post_id)
 
     # change post
     changed_posted = Post.query.filter_by(id=post_id).first()
@@ -87,11 +89,11 @@ def change_post():
         }
 
 
-@app.route('/delete', methods=["GET"])
+@app.route('/posts/delete/<post_id>', methods=["GET"])
 @jwt_required
-def delete_post():
+def delete_post(post_id):
     # code for deleting a post
-    delete_id = int(request.args.get('id'))
+    delete_id = int(post_id)
     
     delete_post = Post.query.filter_by(id=delete_id).first()
 
