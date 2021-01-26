@@ -20,7 +20,7 @@ class User(db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
+    body = db.Column(db.String(500))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer)
 
@@ -31,8 +31,10 @@ class WineStore(db.Model):
     owner = db.Column(db.Integer) # user id of the owner of this store
 
     id = db.Column(db.Integer, primary_key=True) # primary key
-    name = db.Column(db.String)
-    address = db.Column(db.String) # example: 111 jordan street
-    location = db.Column(db.String) # example: lat 10, long 20
+    name = db.Column(db.String(64))
+    address = db.Column(db.String(120)) # example: 111 jordan street
+    
+    lat = db.Column(db.Integer) # example: lat 10, long 20
+    lng = db.Column(db.Integer) # note: reset these to floats
 
 

@@ -24,4 +24,4 @@ app.secret_key = '01jokjd01pj;kdj;aouskd'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from app import models, user_routes, post_routes
+from app import models, user_routes, post_routes, winestore_routes

@@ -37,7 +37,7 @@ def current_user():
 # create decorator for function
 # also check if the token is valid
 def jwt_required(func):
-    def wrapper():
+    def wrapper(*args, **kwargs):
         error_json = {
             'error': 1,
             'mes': 'Please send token(be sure it\'s valid) for this endpoint'
@@ -59,7 +59,7 @@ def jwt_required(func):
             
             # if token is valid the func will be ran
             # the function gets RETURNED
-            return func()
+            return func(*args, **kwargs)
 
     # if we dont do this, then there will be multiple 
     # wrapper() funcs, so each wrapper func 
