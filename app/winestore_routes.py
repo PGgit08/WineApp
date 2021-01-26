@@ -1,5 +1,5 @@
 from app import db, app
-from app.models import WineStore, Post, User
+from app.models import WineStore, Post, User, datetime
 from flask import request, jsonify, make_response
 from app.jwt_manager import *
 
@@ -137,6 +137,13 @@ def get_by_id(store_id):
 
     if store:
         posts = Post.query.filter_by(my_store=store_id).all()
+        # make this json readable
+        for post in posts:
+            posts[posts.index(post)] = {
+                "owner": User.query.filter_by(id=post.user_id).first().username,
+                "body": post.body,
+                "date_made": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
+            }
 
         store_response = {
             'posts': posts
