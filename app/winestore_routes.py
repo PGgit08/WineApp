@@ -62,7 +62,6 @@ def new_store():
     }
 
     
-
     find_store = WineStore.query.filter_by(name=store_name, 
                                             address=address, 
                                             lat=lat,
@@ -177,27 +176,27 @@ def lookup():
     # the description of what this does is 
     # above
 
+    '''
+    Some parameters for the lookup dict:
+
+    search_string: a string that the user input into the search bar
+                   this can be an address, a name, or a location(lat, lng)
+
+    lat, lng: the endpoint gets these params when the user clicks(onholdpress) on a marker
+    '''
     # lookup params here
     lookup = {}
 
-    # layer 1 for building lookup
+    # build lookup from request params
     for arg in request.args:
         lookup[arg] = request.args.get(arg)
 
-    
-    lookup_object = DictToObject(lookup)
 
     # try to find stores based on this lookup
-    try:
-        found_stores = None
-        
-        # lookup loop
-        for i in lookup:
-            attr = getattr(lookup_object, i)
-            
-    
-    except Exception as e:
-        print(e)
+    # this is in progress
+    # im thinking to like just 
+    # brute forcing it
+    # trying to filter_by the search_string
 
 
     return 'api endpoint in work'
