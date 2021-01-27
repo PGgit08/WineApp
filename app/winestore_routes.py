@@ -136,16 +136,18 @@ def get_by_id(store_id):
 
     if store:
         posts = Post.query.filter_by(my_store=store_id).all()
+        packed_posts = []
         # make this json readable
         for post in posts:
-            posts[posts.index(post)] = {
+            packed_posts.append({
+                "id": post.id,
                 "owner": User.query.filter_by(id=post.user_id).first().username,
                 "body": post.body,
                 "date_made": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
-            }
+            })
 
         store_response = {
-            'posts': posts
+            'posts': packed_posts
         }
 
         # fill up store response
@@ -176,6 +178,11 @@ def lookup():
     # the description of what this does is 
     # above
 
+    api_response = {
+        'error': 0,
+        'msg': ''
+    }
+
     '''
     Some parameters for the lookup dict:
 
@@ -189,15 +196,45 @@ def lookup():
 
     # build lookup from request params
     for arg in request.args:
-        lookup[arg] = request.args.get(arg)
+        if arg == 'search_string':
+            lookup[arg] = '%{}%'.format(request.args.get(arg))
 
+        if arg == 'lat' or arg == 'lng':
+            # turn these into integers(later turn them into floats)
+            lookup[arg] == int(request.args.get(arg))
 
+    
     # try to find stores based on this lookup
-    # this is in progress
-    # im thinking to like just 
-    # brute forcing it
-    # trying to filter_by the search_string
+    if 'search_string' in lookup:
+        name_finds = WineStore.query.filter(WineStore.name.like(lookup['search_string'])).all()
+        address_finds = WineStore.query.filter(WineStore.address.like(lookup['search_string'])).all()
 
+        packed_finds = []
 
-    return 'api endpoint in work'
+        # search for name 
+        for find in name_finds:
+            packed_finds.append(
+                {
+                    "id": find.id,
+                    "name": find.name,
+                    "address": find.address,
+                    "owner": User.query.filter_by(id=find.owner).first().username
+                }
+            )
+
+        # search for address
+        for find in address_finds:
+            packed_finds.append(
+                {
+                    "id": find.id,
+                    "name": find.name,
+                    "address": find.address,
+                    "owner": User.query.filter_by(id=find.owner).first().username
+                }
+            )
+        
+        # pack
+        api_response['finds'] = packed_finds
+
+    return jsonify(api_response)
 
