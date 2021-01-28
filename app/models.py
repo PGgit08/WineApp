@@ -28,13 +28,15 @@ class Post(db.Model):
     my_store = db.Column(db.Integer)
 
 class WineStore(db.Model):
-    owner = db.Column(db.Integer) # user id of the owner of this store
-
     id = db.Column(db.Integer, primary_key=True) # primary key
-    name = db.Column(db.String(64))
-    address = db.Column(db.String(120)) # example: 111 jordan street
-    
-    lat = db.Column(db.Integer) # example: lat 10, long 20
-    lng = db.Column(db.Integer) # note: reset these to floats
+
+    # google maps related info
+    google_id = db.Column(db.String(180)) # google place id
+    name = db.Column(db.String(200))
 
 
+    # google maps id can change, so location info should also exist
+    lat = db.Column(db.Float)
+    lng = db.Column(db.Float)
+
+    address = db.Column(db.String(200))

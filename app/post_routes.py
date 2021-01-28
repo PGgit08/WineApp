@@ -41,10 +41,10 @@ def add_post():
 
     # get request params
     post_body = request.args.get("body")
-    place_id = request.args.get("place_id")
+    place_id = request.args.get("place_id", type=int)
 
-    # create row based on model
-    new_post = Post(user_id=user_id, body=post_body, my_store=place_id)
+    # create the post
+    new_post = Post(body=post_body, my_store=place_id, user_id=user_id)
 
     # add post
     db.session.add(new_post)
