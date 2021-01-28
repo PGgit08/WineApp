@@ -21,6 +21,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # secret key for cookies which decodes cookies
 app.secret_key = '01jokjd01pj;kdj;aouskd'
 
+# error handler
+@app.errorhandler(500)
+def internal_error():
+        return 'error'
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

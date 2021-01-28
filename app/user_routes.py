@@ -11,7 +11,7 @@ from app.jwt_manager import *
 def home():
     return 'Api for wineapp, route not found'
 
-@app.route('/user/login')
+@app.route('/users/login')
 def login():
     username = request.args.get('username')
     password = request.args.get('password')
@@ -38,7 +38,7 @@ def login():
         }
         return jsonify(api_response)
 
-@app.route('/user/register')
+@app.route('/users/register')
 def register():
     username = request.args.get('username')
     password = request.args.get('password')
@@ -77,7 +77,7 @@ def register():
         return jsonify(api_response)
 
 # this is done in app's init page
-@app.route('/user/identify')
+@app.route('/users/identify')
 @jwt_required
 def identity():
     user = current_user()

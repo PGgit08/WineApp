@@ -51,8 +51,8 @@ def new_store():
     store_name = request.args.get('name')
     address = request.args.get('address')
 
-    lat = int(request.args.get('lat'))
-    lng = int(request.args.get('lng'))
+    lat = request.args.get('lat', type=int)
+    lng = request.args.get('lng', type=int)
 
     # some later on processing of address and location here
 
@@ -83,7 +83,7 @@ def new_store():
 @app.route('/stores/change/<int:store_id>')
 @jwt_required
 def change_store(store_id):
-    # change name of store
+    # still not completly sure how to make this
     user_id = current_user().id
 
     api_response = {
@@ -160,6 +160,7 @@ def get_by_id(store_id):
             'lng': store.lng
         }
         api_response['store'] = store_response
+        api_response['msg'] = 'Found This Store Successfully'
     
     else: 
         api_response['msg'] = 'Can\t Find this Store'
@@ -184,57 +185,64 @@ def lookup():
     }
 
     '''
-    Some parameters for the lookup dict:
-
     search_string: a string that the user input into the search bar
-                   this can be an address, a name, or a location(lat, lng)
-
-    lat, lng: the endpoint gets these params when the user clicks(onholdpress) on a marker
+                   this can be an address or a name
     '''
-    # lookup params here
-    lookup = {}
-
-    # build lookup from request params
-    for arg in request.args:
-        if arg == 'search_string':
-            lookup[arg] = '%{}%'.format(request.args.get(arg))
-
-        if arg == 'lat' or arg == 'lng':
-            # turn these into integers(later turn them into floats)
-            lookup[arg] == int(request.args.get(arg))
-
+    # search_string here
+    search_string = "%{}%".format(request.args.get('search_string'))
     
     # try to find stores based on this lookup
-    if 'search_string' in lookup:
-        name_finds = WineStore.query.filter(WineStore.name.like(lookup['search_string'])).all()
-        address_finds = WineStore.query.filter(WineStore.address.like(lookup['search_string'])).all()
+    name_finds = WineStore.query.filter(WineStore.name.like(search_string)).all()
+    address_finds = WineStore.query.filter(WineStore.address.like(search_string)).all()
 
-        packed_finds = []
+    packed_finds = []
 
-        # search for name 
-        for find in name_finds:
-            packed_finds.append(
-                {
-                    "id": find.id,
-                    "name": find.name,
-                    "address": find.address,
-                    "owner": User.query.filter_by(id=find.owner).first().username
-                }
-            )
+    # search for name 
+    for find in name_finds:
+        packed_finds.append(
+            {
+                "id": find.id,
+                "name": find.name,
+                "address": find.address,
+                "owner": User.query.filter_by(id=find.owner).first().username
+            }
+        )
 
-        # search for address
-        for find in address_finds:
-            packed_finds.append(
-                {
-                    "id": find.id,
-                    "name": find.name,
-                    "address": find.address,
-                    "owner": User.query.filter_by(id=find.owner).first().username
-                }
-            )
-        
-        # pack
-        api_response['finds'] = packed_finds
+    # search for address
+    for find in address_finds:
+        packed_finds.append(
+            {
+                "id": find.id,
+                "name": find.name,
+                "address": find.address,
+                "owner": User.query.filter_by(id=find.owner).first().username
+            }
+        )
+    
+    # pack
+    api_response['finds'] = packed_finds
+    api_response['msg'] = 'Store Find Endpoint Success'
 
     return jsonify(api_response)
 
+@app.route('/stores/near_me')
+def near_me():
+    '''
+    This api is here to show the user
+    what stores are near them.
+    '''
+
+    api_response = {
+        'error': 0,
+        'msg': ''
+    }
+
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+
+    lat_plus = 1 / 69
+    lng_plus = 1 / 54.6
+
+    print(WineStore.lat.between(lat, lat + 5))
+
+    return jsonify(api_response)
