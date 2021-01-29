@@ -2,6 +2,7 @@ from app import db, app
 from app.models import WineStore, Post, User, datetime
 from flask import request, jsonify, make_response
 from app.jwt_manager import *
+from sqlalchemy import or_
 
 # for google api
 from requests import get
@@ -19,6 +20,48 @@ def new_store():
         'error': 0,
         'msg': 'Api in progress'
     }
+
+    google_id = request.args.get('g_id')
+    
+    # first check if this place even exists
+    check_finds = WineStore.query.filter_by(google_id=google_id).all()
+    if check_finds:
+        api_response['error'] = 1
+        api_response['msg'] = 'This place already exists'
+        return jsonify(api_response)
+
+    # request to google api to
+    # get the place's info and save
+    # the place based on the info
+
+    details_url = 'https://maps.googleapis.com/maps/api/place/details/json'
+    params = {
+        'key': "AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I",
+        'place_id': google_id,
+        'fields': "formatted_address,geometry,place_id,name,vicinity"
+    } 
+
+    response = get(details_url, params).json()
+
+    # incase an api error
+    if response['status'] != 'OK':
+        api_response['error'] = 1
+        api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
+        return jsonify(api_response)
+    
+    store = response['result']
+    # make the new store
+    new_winestore = WineStore(
+        name=store['name'],
+        google_id=store['place_id'],
+        lat=float(store['geometry']['location']['lat']),
+        lng=float(store['geometry']['location']['lng']),
+        address=store['formatted_address'],
+        vicinity=store['vicinity']
+    )
+    db.session.add(new_winestore)
+    db.session.commit()
+    api_response['msg'] = 'Store Made Successfully'
 
     return jsonify(api_response)
 
@@ -57,6 +100,7 @@ def get_by_id(store_id):
         store_response['id'] = store.id
         store_response['name'] = store.name
         store_response['address'] = store.address
+        store_response['vicinity'] = store.vicinity
         store_response['location'] = {
             'lat': store.lat,
             'lng': store.lng
@@ -73,6 +117,30 @@ def get_by_id(store_id):
     return jsonify(api_response)
 
 
+# this function is for 
+# dealing with big amounts of json
+# like the google api
+def json_handler(json):
+    stores = json['results']
+
+    for store in stores:
+        name = store['name']
+        place_id = store['place_id']
+
+        lat = float(store['geometry']['location']['lat'])
+        lng = float(store['geometry']['location']['lng'])
+
+        # right here find a store with these params
+        # set it's wineapp_id in the store dict
+        find = WineStore.query.filter(or_(WineStore.google_id == place_id, 
+                                   WineStore.name == name,
+                                   WineStore.lat == lat,
+                                   WineStore.lng == lng)).first()
+        print(find)
+        # later update the place
+
+    return 'in process'
+
 '''
 This next api route is the most important one of WineApp.
 A user can search for a store by it's address, name, etc.(which can be done by lookup or onholdpress)
@@ -84,12 +152,20 @@ def lookup():
     # above
 
     # google request here
-    lookup_url = 'https://'
+    lookup_url = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
     params = {
-
+        "query": request.args.get("input"),
+        "key": "AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I",
+        "type": "liquor_store"
     }
 
     response = get(lookup_url, params).json()
+
+    # incase an api error
+    if response['status'] != 'OK':
+        api_response['error'] = 1
+        api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
+        return jsonify(api_response)
 
     api_response = {
         'error': 0,
@@ -106,7 +182,7 @@ def near_me():
     '''
 
     # google request here
-    near-me_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
+    near_me_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
     params = {
         "location": request.args.get('loc'),
         "radius": request.args.get('rad'),
@@ -114,7 +190,18 @@ def near_me():
         "key": 'AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I'
     }
 
-    response = get(near-me_url, params).json()
+    response = get(near_me_url, params).json()
+    
+    # incase an api error
+    if response['status'] != 'OK':
+        api_response['error'] = 1
+        api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
+        return jsonify(api_response)
+
+    new_json = json_handler(response)
+
+    # now parsing through this data, if this place exists in the database
+    # add it's id to the server response
 
     api_response = {
         'error': 0,

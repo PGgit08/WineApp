@@ -32,11 +32,14 @@ class WineStore(db.Model):
 
     # google maps related info
     google_id = db.Column(db.String(180)) # google place id
+
+    # google maps id can change, so this info should also exist
+    # there a different type of data
+    # because if one changes it can rely on the other
     name = db.Column(db.String(200))
 
-
-    # google maps id can change, so location info should also exist
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
 
     address = db.Column(db.String(200))
+    vicinity = db.Column(db.String(180))
