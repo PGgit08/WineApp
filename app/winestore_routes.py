@@ -132,10 +132,14 @@ def json_handler(json):
 
         # right here find a store with these params
         # set it's wineapp_id in the store dict
-        find = WineStore.query.filter(or_(WineStore.google_id == place_id, 
-                                   WineStore.name == name,
-                                   WineStore.lat == lat,
-                                   WineStore.lng == lng)).first()
+        check = or_(WineStore.google_id == place_id, 
+                    WineStore.name == name,
+                    WineStore.lat == lat,
+                    WineStore.lng == lng)
+
+        print(check)
+
+        find = WineStore.query.filter(check).first()
         print(find)
         # later update the place
 
@@ -159,7 +163,9 @@ def lookup():
         "type": "liquor_store"
     }
 
-    response = get(lookup_url, params).json()
+    response = get(lookup_url, params)
+    # print(response.url)
+    response = response.json()
 
     # incase an api error
     if response['status'] != 'OK':
@@ -181,6 +187,12 @@ def near_me():
     what stores are near them.
     '''
 
+    api_response = {
+        'error': 0,
+        'msg': ''
+    }
+
+
     # google request here
     near_me_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json'
     params = {
@@ -190,7 +202,9 @@ def near_me():
         "key": 'AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I'
     }
 
-    response = get(near_me_url, params).json()
+    response = get(near_me_url, params)
+    # print(response.url)
+    response = response.json()
     
     # incase an api error
     if response['status'] != 'OK':
@@ -202,10 +216,4 @@ def near_me():
 
     # now parsing through this data, if this place exists in the database
     # add it's id to the server response
-
-    api_response = {
-        'error': 0,
-        'msg': ''
-    }
-
     return jsonify(api_response)
