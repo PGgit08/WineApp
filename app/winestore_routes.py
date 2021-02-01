@@ -154,6 +154,9 @@ def json_handler(json):
                     WineStore.lng == lng)
 
         find = WineStore.query.filter(check)
+        if not find:
+            continue 
+        
         store['winestore_id'] = find.first().id 
         # here update the place
         # use the details_request to update this places info
