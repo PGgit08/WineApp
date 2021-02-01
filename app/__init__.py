@@ -22,9 +22,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = '01jokjd01pj;kdj;aouskd'
 
 # error handler
-@app.errorhandler(500)
-def internal_error():
-        return 'error'
+# @app.errorhandler(500)
+# def internal_error(**args):
+#         return 'error'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

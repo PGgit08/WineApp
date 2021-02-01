@@ -15,6 +15,7 @@ This is called when the app sees a post being made to a store.
 That doesn't have a WineApp id.
 '''
 @app.route('/stores/new')
+@jwt_required
 def new_store():
     api_response = {
         'error': 0,
@@ -24,7 +25,7 @@ def new_store():
     google_id = request.args.get('g_id')
     
     # first check if this place even exists
-    check_finds = WineStore.query.filter_by(google_id=google_id).all()
+    check_finds = WineStore.query.filter_by(google_id=google_id).first()
     if check_finds:
         api_response['error'] = 1
         api_response['msg'] = 'This place already exists'
@@ -34,28 +35,19 @@ def new_store():
     # get the place's info and save
     # the place based on the info
 
-    details_url = 'https://maps.googleapis.com/maps/api/place/details/json'
-    params = {
-        'key': "AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I",
-        'place_id': google_id,
-        'fields': "formatted_address,geometry,place_id,name,vicinity"
-    } 
-
-    response = get(details_url, params).json()
-
-    # incase an api error
-    if response['status'] != 'OK':
+    store = details_request(google_id)
+    if not store:
+        # if nothing was found
         api_response['error'] = 1
-        api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
-        return jsonify(api_response)
-    
-    store = response['result']
+        api_response['msg'] = 'Can\'t find this store incorrect g_id.'
+        return api_response
+
     # make the new store
     new_winestore = WineStore(
         name=store['name'],
         google_id=store['place_id'],
-        lat=float(store['geometry']['location']['lat']),
-        lng=float(store['geometry']['location']['lng']),
+        lat=store['lat'],
+        lng=store['lng'],
         address=store['formatted_address'],
         vicinity=store['vicinity']
     )
@@ -117,6 +109,30 @@ def get_by_id(store_id):
     return jsonify(api_response)
 
 
+# function for google details api
+def details_request(place_id):
+    details_url = 'https://maps.googleapis.com/maps/api/place/details/json'
+    params = {
+        'key': "AIzaSyDddVDWwqLQWv0lnZbEAD6Up9SF2EYH-6I",
+        'place_id': place_id,
+        'fields': "formatted_address,geometry,place_id,name,vicinity"
+    } 
+
+    response = get(details_url, params).json()
+    if response['status'] != 'OK':
+        return False
+    
+    store = response['result']
+
+    # set lat and lng settings
+    store['lat'] = float(store['geometry']['location']['lat'])
+    store['lng'] = float(store['geometry']['location']['lng'])
+
+    # delete unused geometry after lat,lng set
+    del store['geometry']
+
+    return store
+
 # this function is for 
 # dealing with big amounts of json
 # like the google api
@@ -137,13 +153,22 @@ def json_handler(json):
                     WineStore.lat == lat,
                     WineStore.lng == lng)
 
-        print(check)
+        find = WineStore.query.filter(check)
+        store['winestore_id'] = find.first().id 
+        # here update the place
+        # use the details_request to update this places info
+        # and then based on returned dict
+        # do update
 
-        find = WineStore.query.filter(check).first()
-        print(find)
-        # later update the place
+        # change attribute name for update
+        updated = details_request(store['place_id'])
+        updated['address'] = updated.pop("formatted_address")
+        updated['google_id'] = updated.pop("place_id")
 
-    return 'in process'
+        find.update(updated)
+        db.session.commit()
+
+    return stores
 
 '''
 This next api route is the most important one of WineApp.
@@ -164,8 +189,12 @@ def lookup():
     }
 
     response = get(lookup_url, params)
-    # print(response.url)
+
+    # remake for debug
     response = response.json()
+
+    # json handler find places
+    finds = json_handler(response)
 
     # incase an api error
     if response['status'] != 'OK':
@@ -177,6 +206,8 @@ def lookup():
         'error': 0,
         'msg': ''
     }
+
+    api_response['finds'] = finds
 
     return jsonify(api_response)
 
@@ -203,16 +234,20 @@ def near_me():
     }
 
     response = get(near_me_url, params)
-    # print(response.url)
+    
+    # remake for debugging
     response = response.json()
     
+    # find places
+    finds = json_handler(response)
+
     # incase an api error
     if response['status'] != 'OK':
         api_response['error'] = 1
         api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
         return jsonify(api_response)
 
-    new_json = json_handler(response)
+    api_response['finds'] = finds
 
     # now parsing through this data, if this place exists in the database
     # add it's id to the server response
