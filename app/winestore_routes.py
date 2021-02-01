@@ -193,14 +193,14 @@ def lookup():
     # remake for debug
     response = response.json()
 
-    # json handler find places
-    finds = json_handler(response)
-
     # incase an api error
     if response['status'] != 'OK':
         api_response['error'] = 1
         api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
         return jsonify(api_response)
+
+    # json handler find places
+    finds = json_handler(response)
 
     api_response = {
         'error': 0,
@@ -237,16 +237,17 @@ def near_me():
     
     # remake for debugging
     response = response.json()
-    
-    # find places
-    finds = json_handler(response)
 
     # incase an api error
     if response['status'] != 'OK':
         api_response['error'] = 1
         api_response['msg'] = 'Google Api Request Error, Try Again and Check Params'
         return jsonify(api_response)
+    
+    # find places
+    finds = json_handler(response)
 
+    # set api_response
     api_response['finds'] = finds
 
     # now parsing through this data, if this place exists in the database
