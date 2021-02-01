@@ -154,7 +154,6 @@ def json_handler(json):
                     WineStore.lng == lng)
 
         find = WineStore.query.filter(check)
-        print(find.first())
         if not find.first():
             continue 
 
