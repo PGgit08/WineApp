@@ -167,6 +167,9 @@ def json_handler(json):
         updated = details_request(store['place_id'])
         updated['address'] = updated.pop("formatted_address")
         updated['google_id'] = updated.pop("place_id")
+        del updated['obfuscated_type']
+
+        print(updated)
 
         find.update(updated)
         db.session.commit()
