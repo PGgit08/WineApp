@@ -167,7 +167,13 @@ def json_handler(json):
         updated = details_request(store['place_id'])
         updated['address'] = updated.pop("formatted_address")
         updated['google_id'] = updated.pop("place_id")
-        del updated['obfuscated_type']
+        
+        try:
+            del updated['obfuscated_type']
+
+        except KeyError:
+            # just don't delete the key
+            pass
 
         print(updated)
 
