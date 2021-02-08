@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 import os
 
@@ -14,7 +15,11 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
 # create app
 app = Flask(__name__)
 
+# cors for app
+cors = CORS(app)
+
 # set config for app 
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

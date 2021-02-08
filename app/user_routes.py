@@ -6,8 +6,10 @@ from app import db, app
 from app.models import User, Post
 from flask import request, jsonify, make_response
 from app.jwt_manager import * 
+from flask_cors import cross_origin
 
 @app.route('/')
+@cross_origin()
 def home():
     return 'Api for wineapp, route not found'
 
