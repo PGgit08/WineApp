@@ -1,0 +1,13 @@
+WineApp Api
+
+List of Routes Here:
+
+Users(prefix: /users)
+/login: login, returns jwt, params required: username, password
+/register: register, returns jwt, params required: username, password, email
+
+Posts(prefix: /posts)
+/add: creates a new post, returns 
+
+
+Stores(prefix: /stores)

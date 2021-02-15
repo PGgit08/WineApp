@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -22,14 +22,20 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['DEBUG'] = True
+app.config['PORT'] = 80
 
 # secret key for cookies which decodes cookies
 app.secret_key = '01jokjd01pj;kdj;aouskd'
 
 # error handler
-# @app.errorhandler(500)
-# def internal_error(**args):
-#         return 'error'
+@app.errorhandler(500)
+def internal_error(error):
+        return render_template('500.html', title='500 Internal Server Error'), 500
+
+@app.errorhandler(404)
+def page_not_found(error):
+        return render_template('404.html', title='404 Page Not Found Error'), 404
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

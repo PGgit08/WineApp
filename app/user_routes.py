@@ -11,7 +11,7 @@ from flask_cors import cross_origin
 @app.route('/')
 @cross_origin()
 def home():
-    return 'Api for wineapp, route not found'
+    return 'Wineapp Api, / page'
 
 @app.route('/users/login')
 def login():
@@ -64,11 +64,16 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         
-        api_response = {
-            'error': 0,
-            'mes': 'Register Successful'
-        }
-        return jsonify(api_response)
+        # create return jwt for this user
+        jwt = create_jwt(new_user.id)
+        if jwt:
+            return jwt
+        
+        if jwt is None:
+            return jsonify({
+                'error': 1,
+                'mes': 'We are having issues with the server, please try again later'
+            })
 
     # if not send bad stuff
     else:
