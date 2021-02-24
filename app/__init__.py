@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -31,11 +31,17 @@ app.secret_key = '01jokjd01pj;kdj;aouskd'
 # error handler
 @app.errorhandler(500)
 def internal_error(error):
-        return render_template('500.html', title='500 Internal Server Error'), 500
+        return jsonify({
+                'error': 1,
+                'msg': 'Server Error(500), Try Again'
+        }), 200
 
 @app.errorhandler(404)
 def page_not_found(error):
-        return render_template('404.html', title='404 Page Not Found Error'), 404
+        return jsonify({
+                'error': 1,
+                'msg': 'Server Error(404), Try Again'
+        }), 200
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
