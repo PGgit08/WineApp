@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -23,7 +23,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG'] = True
-app.config['PORT'] = 80
+# app.config['PORT'] = 80
 
 # secret key for cookies which decodes cookies
 app.secret_key = '01jokjd01pj;kdj;aouskd'
@@ -42,6 +42,12 @@ def page_not_found(error):
                 'error': 1,
                 'msg': 'Server Error(404), Try Again Later'
         }), 200
+
+# favicon.ico
+@app.route('/favicon.ico')
+def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static'), 
+        'app_favicon.png', mimetype='image/vnd.microsoft.icon')
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
