@@ -33,14 +33,14 @@ app.secret_key = '01jokjd01pj;kdj;aouskd'
 def internal_error(error):
         return jsonify({
                 'error': 1,
-                'msg': 'Server Error(500), Try Again'
+                'msg': 'Server Error(500), Try Again Later'
         }), 200
 
 @app.errorhandler(404)
 def page_not_found(error):
         return jsonify({
                 'error': 1,
-                'msg': 'Server Error(404), Try Again'
+                'msg': 'Server Error(404), Try Again Later'
         }), 200
 
 db = SQLAlchemy(app)
