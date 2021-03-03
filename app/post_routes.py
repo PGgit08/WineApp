@@ -37,7 +37,7 @@ def get_all():
     api_json['posts'] = posts_response
 
     # DUMP
-    json = dumps(posts_response)
+    json = dumps(api_json)
     return json
 
 @app.route('/posts/add', methods=["GET"])
