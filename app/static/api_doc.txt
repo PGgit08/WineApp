@@ -1,5 +1,7 @@
 WineApp Api
 
+endpoint: 
+
 List of Routes Here:
 
 Users(prefix: /users)
@@ -7,7 +9,8 @@ Users(prefix: /users)
 /register: register, returns jwt, params required: username, password, email
 
 Posts(prefix: /posts)
-/add: creates a new post, returns 
+/get: get 
+/add: creates a new post, returns status json, required: jwt header, wineapp place id, post body(string)
 
 
 Stores(prefix: /stores)

@@ -1,5 +1,5 @@
 from app import db, app
-from app.models import Post, datetime
+from app.models import Post, datetime, WineStore
 from flask import request, jsonify
 from app.jwt_manager import *
 
@@ -20,15 +20,23 @@ def get_all():
     # response
     posts_response = {}
 
+    # api response
+    api_json = {}
+
     for post in user_posts:
         posts_response[post.id] = {
             "body": post.body,
             "time": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
         }
     
-    posts_response['error'] = 0
-    posts_response['msg'] = 'Info Gotten Successfully'
+    # status
+    api_json['error'] = 0
+    api_json['msg'] = 'Info Gotten Successfully'
 
+    # create posts
+    api_json['posts'] = posts_response
+
+    # DUMP
     json = dumps(posts_response)
     return json
 
@@ -43,17 +51,29 @@ def add_post():
     post_body = request.args.get("body")
     place_id = request.args.get("place_id", type=int)
 
-    # create the post
-    new_post = Post(body=post_body, my_store=place_id, user_id=user_id)
+    # check for the store
+    check_store = WineStore.query.filter_by(id=place_id).first()
 
-    # add post
-    db.session.add(new_post)
-    db.session.commit()
+    # if this store exists
 
-    api_json = {
-        "error": 0,
-        "mes": 'Post Added' 
-    }
+    if check_store:
+        # create the post
+        new_post = Post(body=post_body, my_store=place_id, user_id=user_id)
+
+        # add post
+        db.session.add(new_post)
+        db.session.commit()
+
+        api_json = {
+            "error": 0,
+            "mes": 'Post Added' 
+        }
+
+    if not check_store:
+        api_json = {
+            "error": 1,
+            "mes": "No Parent Store For This Post, Make Store First"
+        }
 
     return jsonify(api_json)
 

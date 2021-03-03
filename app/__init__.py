@@ -49,6 +49,11 @@ def favicon():
         return send_from_directory(os.path.join(app.root_path, 'static'), 
         'app_favicon.png', mimetype='image/vnd.microsoft.icon')
 
+# docs(lol)
+# @app.route('/doc')
+# def docs():
+        # return open('C:\\users\\peter\\wineapp\\app\\static\\api_doc.txt').read()
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
