@@ -18,13 +18,16 @@ def get_all():
     user_posts = Post.query.filter_by(user_id=user_id).all()
 
     # response
-    posts_response = {}
+    post_responses = []
 
     # api response
     api_json = {}
 
     for post in user_posts:
-        posts_response[post.id] = {
+        {
+            "owner": post.user_id,
+            "my_store": post.my_store,
+            "id": post.id
             "body": post.body,
             "time": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
         }
