@@ -37,7 +37,7 @@ def get_all():
     api_json['msg'] = 'Info Gotten Successfully'
 
     # create posts
-    api_json['posts'] = posts_response
+    api_json['posts'] = post_responses
 
     # DUMP
     json = dumps(api_json)
