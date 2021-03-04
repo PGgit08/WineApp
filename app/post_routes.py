@@ -15,6 +15,7 @@ def get_all():
     user_id = current_user().id 
 
     # this user's posts
+    # print(user_id)
     user_posts = Post.query.filter_by(user_id=user_id).all()
 
     # response
@@ -24,13 +25,13 @@ def get_all():
     api_json = {}
 
     for post in user_posts:
-        {
+        post_responses.append({
             "owner": post.user_id,
             "my_store": post.my_store,
             "id": post.id,
             "body": post.body,
             "time": datetime.strftime(post.timestamp, "%m/%d/%Y, %H:%M:%S")
-        }
+        })
     
     # status
     api_json['error'] = 0
